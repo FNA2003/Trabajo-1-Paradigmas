@@ -6,10 +6,10 @@ Macaron
 */
 
 class Macaron {
-  const property peso = null // Inicializar
-  const tiene_cobertura = false // Inicializar
+  const property peso // Inicializar
+  const tiene_cobertura // Inicializar
 
-  method es_natural() = tiene_cobertura
+  method es_natural() = not tiene_cobertura
   
   method es_especial() = (peso > 50) && tiene_cobertura
   
@@ -52,8 +52,8 @@ pero podría haber otros en un futuro, con diferentes valores:
 */
 
 class Alfajor {
-  const peso_de_tapas = null // Inicializar
-  const relleno = null // Inicializar
+  const peso_de_tapas // Inicializar
+  const relleno // Inicializar
   const property peso = rellenos_existentes.peso(relleno) + peso_de_tapas
 
   method es_natural() = rellenos_existentes.es_natural(relleno)
@@ -77,8 +77,8 @@ class Alfajor {
 // ============================================================
 
 class Relleno {
-  const property peso = null // Inicializar
-  const property es_natural = false // Inicializar
+  const property peso // Inicializar
+  const property es_natural // Inicializar
 }
 
 // ============================================================
@@ -88,27 +88,25 @@ object rellenos_existentes {
   const confiture_de_groseilles = new Relleno(peso = 25, es_natural = false)
   const miel = new Relleno(peso = 20, es_natural = true)
 
-  const rellenos = ['dulce_de_leche' -> dulce_de_leche, 'confiture_de_groseilles' -> confiture_de_groseilles, 'miel' -> miel]
+  const rellenos = [dulce_de_leche, confiture_de_groseilles, miel].asSet()
 
   method peso(relleno){
-    if(rellenos.containsKey(relleno)){
-      const peso = rellenos[relleno].peso()
+    if(rellenos.contains(relleno)){
+      const peso = relleno.peso()
       return peso
     } 
     else {
-      const peso = 0
-      return peso
+      console.println('No existe el relleno seleccionado para el alfajor')
     }
   }
 
   method es_natural(relleno){
-    if(rellenos.containsKey(relleno)){
-      const es_natural = rellenos[relleno].es_natural()
+    if(rellenos.contains(relleno)){
+      const es_natural = relleno.es_natural()
       return es_natural
     } 
     else {
-      const es_natural = false
-      return es_natural
+      console.println('No existe el relleno seleccionado para el alfajor')
     }
   }
 
@@ -128,11 +126,11 @@ Porciones de tortas
 - Siempre son naturales y su valoracion es 100.
 */
 class Porciones_de_torta {
-  const tipo_de_torta = null // Inicializar
-  const ingredientes = [] // Inicializar
+  const tipo_de_torta // Inicializar
+  const ingredientes // Inicializar
   const tiene_chocolate = ingredientes.contains('chocolate') || ingredientes.contains('Chocolate')
 
-  const property peso = null // Inicializar
+  const property peso // Inicializar
 
   method es_natural() = true
   
@@ -165,7 +163,7 @@ class Mesa_dulce {
 
   method peso() = componentes.sum{componente => componente.peso()}
 
-  method es_natural() = componentes.all{componente => componente.es_natural()}
+  method es_natural() = not componentes.any{componente => not componente.es_natural()}
   
   method es_especial() = (componentes.size() >= 3)
   
@@ -199,9 +197,10 @@ patisserie.
 */
 
 class Cliente {
-  var credito = null
-  const productos_de_agrado = []
-  const primera_vez_que_compra = false
+  var credito // Inicializar
+  const productos_de_agrado // Inicializar
+  const primera_vez_que_compra // Inicializar
+  const productos_comprados = []
   var property presente = false
 
   method le_agrada(productos){
@@ -214,7 +213,8 @@ class Cliente {
   }
 
   method darse_un_gusto(){
-    const productos_accesibles = productos_de_agrado.filter{producto => (credito >= producto.precio())}
+    const productos_disponibles = patisserie.productos()
+    const productos_accesibles = productos_de_agrado.filter{producto => (credito >= producto.precio())}.filter({producto => productos_disponibles.contains(producto)})
     if(productos_accesibles.size() >= 1){
       self.comprar(productos_accesibles.get(0))
       }
@@ -225,66 +225,10 @@ class Cliente {
 
   method comprar(producto) {
     credito -= producto.precio()
+    productos_comprados.add(producto)
   }
 
   method retirarse() {
     presente = false
-  }
-}
-
-// ====================================================================================================================================
-/*
-La Patisserie
-*/
-
-object la_patisserie{
-  const clientes = new Dictionary()
-  const productos = new Dictionary()
-  var cliente_actual = null
-  
-  method agregar_cliente(cliente, credito, productos_de_agrado, primera_vez_que_compra) {
-    const objeto_cliente = new Cliente(credito = credito, productos_de_agrado = productos_de_agrado, primera_vez_que_compra = primera_vez_que_compra)
-    const nombre_del_cliente = cliente.toString()
-    clientes.put(nombre_del_cliente, objeto_cliente)
-  }
-
-  method agregar_producto(producto, tipo_de_producto, peso, tiene_cobertura, peso_de_tapas, relleno, tipo_de_torta, ingredientes) {
-
-    const nombre_del_producto = producto.toString()
-    
-    if(tipo_de_producto.toString() == 'Macaron'){
-      const objeto_producto = new Macaron(peso = peso, tiene_cobertura = tiene_cobertura)
-      productos.put(nombre_del_producto, objeto_producto)
-    } 
-    if(tipo_de_producto.toString() == 'Alfajor'){
-      const objeto_producto = new Alfajor(peso_de_tapas = peso_de_tapas, relleno = relleno)
-      productos.put(nombre_del_producto, objeto_producto)
-    } 
-    if(tipo_de_producto.toString() == 'Porciones_de_torta'){
-      const objeto_producto = new Porciones_de_torta(peso = peso, tipo_de_torta = tipo_de_torta, ingredientes = ingredientes)
-      productos.put(nombre_del_producto, objeto_producto)
-    }
-  }
-
-  method armar_mesa_dulce(nombre_de_mesa_dulce, componentes) {
-    const lista_de_componentes = []
-    componentes.forEach({componente => componente.toString()})
-    componentes.forEach({componente => lista_de_componentes.add(componente)})
-    const objeto_producto = new Mesa_dulce(componentes = lista_de_componentes)
-    productos.put(nombre_de_mesa_dulce, objeto_producto)
-  }
-
-  method cliente_actual(cliente) {
-    if(clientes.containsValue(cliente)){
-      cliente_actual = cliente
-      cliente_actual.presente(true)
-    }
-  }
-
-  method cliente_darse_un_gusto() {
-    if(cliente_actual.presente()){
-      cliente_actual.le_agrada(productos)
-      cliente_actual.darse_un_gusto()
-    }
   }
 }
