@@ -4,9 +4,9 @@ object juego {
   method iniciar() {
   game.title("Juego1")
   game.cellSize(15)
-	game.height(30)
-	game.width(30)
-  game.boardGround("fondo.jpg")
+	game.height(15)
+	game.width(62)
+  game.boardGround("mapa1.jpg")
   game.addVisualCharacter(personaje)
 
   keyboard.left().onPressDo({personaje.voltearIzq()})
@@ -23,7 +23,8 @@ object juego {
     izquierda = personaje.izquierda()) //o hacia la izquierda
     game.addVisual(bala) //agrego la bala al tablero
     })
-  game.onTick(500, "impulso", { bala.impulso(direccion) }) //hago que la bala se mueva cada medio segundo
+  //game.onTick(500, "impulso", { bala.impulso(direccion) }) //hago que la bala se mueva cada medio segundo
+  // La linea de arriba no anda, hay que preguntar porque.
   game.start()
   }
 }
