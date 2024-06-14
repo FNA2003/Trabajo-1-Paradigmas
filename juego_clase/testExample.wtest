@@ -1,0 +1,9 @@
+import mainExample.*
+import example.*
+
+
+describe "group of tests for game" {
+
+  test "test1" {}
+
+}
