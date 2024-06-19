@@ -186,9 +186,9 @@ object gameManager {
         game.whenCollideDo(bomberman, {collider =>
             if (collider.tag() == "explosion"){
                 antiBomberman.bombasDisponibles(antiBomberman.bombasDisponibles() + 1)
-                game.say(antiBomberman, antiBomberman.festejo())
+                game.say(antiBomberman, { antiBomberman.festejo() })
                 bomberman.monedasRecogidas(bomberman.monedasRecogidas() - 1)
-                game.say(bomberman, bomberman.quejarse())
+                game.say(bomberman, { bomberman.quejarse() })
                 bomberman.position(game.origin())
                 game.sound("Bomberman_Dies.wav").play()
             } 
@@ -198,12 +198,12 @@ object gameManager {
                 if(bomberman.monedasRecogidas() >= 5){
                     game.addVisual(finDeJuego)
                     restart.restart(bomberman, antiBomberman, monedas)
-                    game.schedule(2000, game.removeVisual(finDeJuego))
+                    game.schedule(2000, { game.removeVisual(finDeJuego) })
                 } 
                 else {
                     game.removeVisual(collider)
                     bomberman.bombasDisponibles(bomberman.bombasDisponibles() + 1)
-                    game.say(bomberman, bomberman.puntaje())
+                    game.say(bomberman, { bomberman.puntaje() })
                     game.schedule(1000, {game.say(bomberman, bomberman.festejo())})
                 }
             }
@@ -212,9 +212,9 @@ object gameManager {
         game.whenCollideDo(antiBomberman, {collider =>
             if (collider.tag() == "explosion"){
                 bomberman.bombasDisponibles(bomberman.bombasDisponibles() + 1)
-                game.say(bomberman, bomberman.festejo())
+                game.say(bomberman, { bomberman.festejo() })
                 antiBomberman.monedasRecogidas(antiBomberman.monedasRecogidas() - 1)
-                game.say(antiBomberman, antiBomberman.quejarse())
+                game.say(antiBomberman, { antiBomberman.quejarse() })
                 antiBomberman.position(game.at(14,10))
                 game.sound("Bomberman_Dies.wav").play()
             } 
@@ -224,13 +224,13 @@ object gameManager {
                 if(antiBomberman.monedasRecogidas() >= 5){
                     game.addVisual(finDeJuego)
                     restart.restart(bomberman, antiBomberman, monedas)
-                    game.schedule(2000, game.removeVisual(finDeJuego))
+                    game.schedule(2000, { game.removeVisual(finDeJuego) })
                 } 
                 else {
                     game.removeVisual(collider)
                     antiBomberman.bombasDisponibles(antiBomberman.bombasDisponibles() + 1)
-                    game.say(antiBomberman, antiBomberman.puntaje())
-                    game.schedule(1000, {game.say(antiBomberman, antiBomberman.festejo())})
+                    game.say(antiBomberman, { antiBomberman.puntaje() })
+                    game.schedule(2000, {game.say(antiBomberman, antiBomberman.festejo())})
                 }
             }
         })
@@ -262,9 +262,10 @@ object gameManager {
 // Objeto para reinicios del juego
 object restart {
     method restart(jugador1, jugador2, listaDeMonedas){
-        listaDeMonedas.forEach({moneda => game.removeVisual(moneda)})
+        listaDeMonedas.forEach({moneda => game.removeVisual(moneda) listaDeMonedas.remove(moneda)})
         jugador1.position(game.origin())
         jugador2.position(game.at(14,10))
+        game.removeTickEvent("girarMoneda")
         
         jugador1.bombasDisponibles(1)
         jugador2.bombasDisponibles(1)
