@@ -1,7 +1,0 @@
-import clases.*
-
-
-program juego {
-    gameManager.iniciarPartida()
-    game.start()
-}
