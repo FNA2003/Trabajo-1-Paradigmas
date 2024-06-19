@@ -169,8 +169,8 @@ object gameManager {
         game.height(12)
         game.cellSize(16)
         
-        const cartelMonedasJug1 = new Effects(position=game.at(4,11), image="bomberman_coins_0.png", tag="cartel")
-        const cartelMonedasJug2 = new Effects(position=game.at(12,11), image="antiBomberman_coins_0.png", tag="cartel")
+        const cartelMonedasJug1 = new Effects(position=game.at(3,11), image="bomberman_coins_0.png", tag="cartel")
+        const cartelMonedasJug2 = new Effects(position=game.at(11,11), image="antiBomberman_coins_0.png", tag="cartel")
         const cartelBombasJug1 = new Effects(position=game.at(1,11), image="bomberman_bombs_1.png", tag="cartel")
         const cartelBombasJug2 = new Effects(position=game.at(9,11), image="antiBomberman_bombs_1.png", tag="cartel")
 
