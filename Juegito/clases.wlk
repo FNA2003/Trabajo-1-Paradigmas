@@ -27,15 +27,13 @@ class Bombermans{
             "_coins_4.png",
             "_coins_5.png"
         ]
-    const nombreBombas = [
+        const nombreBombas = [
         "_bombs_0.png",
         "_bombs_1.png",
         "_bombs_2.png",
         "_bombs_3.png",
         "_bombs_4.png"
     ]
-
-
     // Metodo para que el jugador se mueva dentro de los limites
     method move(direction) {        
         game.sound("Walking.wav").play()
@@ -56,7 +54,7 @@ class Bombermans{
 
     method variarCantBombas(cartelBombas) {
         if (bombasDisponibles > 4) { bombasDisponibles = 4 }
-        cartelBombas.image(tag + nombreBombas.get(bombasDisponibles))
+        cartelBombas.image("bombermans" + nombreBombas.get(bombasDisponibles))
     }
     method agarrarMoneda(moneda, cartelMonedas) {
         monedasRecogidas += 1
@@ -73,7 +71,7 @@ class Bombermans{
         monedasRecogidas = 0
         bombasDisponibles = 1
 
-        cartelBombas.image(tag + nombreBombas.get(1))
+        cartelBombas.image("bombermans" + nombreBombas.get(1))
         cartelMonedas.image(tag + nombreMonedas.get(0))
     }
 }
@@ -171,8 +169,8 @@ object gameManager {
         
         const cartelMonedasJug1 = new Effects(position=game.at(3,11), image="bomberman_coins_0.png", tag="cartel")
         const cartelMonedasJug2 = new Effects(position=game.at(11,11), image="antiBomberman_coins_0.png", tag="cartel")
-        const cartelBombasJug1 = new Effects(position=game.at(1,11), image="bomberman_bombs_1.png", tag="cartel")
-        const cartelBombasJug2 = new Effects(position=game.at(9,11), image="antiBomberman_bombs_1.png", tag="cartel")
+        const cartelBombasJug1 = new Effects(position=game.at(1,11), image="bombermans_bombs_1.png", tag="cartel")
+        const cartelBombasJug2 = new Effects(position=game.at(9,11), image="bombermans_bombs_1.png", tag="cartel")
 
         game.addVisual(cartelMonedasJug1)
         game.addVisual(cartelMonedasJug2)
@@ -234,6 +232,12 @@ object gameManager {
                 bomberman.position(game.origin())
                 game.sound("Bomberman_Dies.wav").play()
                 game.removeVisual(collider)
+
+                if(antiBomberman.monedasRecogidas() >= 5){
+                    game.addVisual(finDeJuego)
+                    restart.restart(bomberman, antiBomberman, monedas, cartelMonedasJug1, cartelBombasJug1, cartelMonedasJug2, cartelBombasJug2)
+                    game.schedule(2000, { game.removeVisual(finDeJuego) })
+                }
             } 
             else if (collider.tag() == "moneda"){
                 bomberman.agarrarMoneda(collider, cartelMonedasJug1)
@@ -258,6 +262,12 @@ object gameManager {
                 antiBomberman.position(game.at(14,10))
                 game.sound("Bomberman_Dies.wav").play()
                 game.removeVisual(collider)
+
+                if(bomberman.monedasRecogidas() >= 5){
+                    game.addVisual(finDeJuego)
+                    restart.restart(bomberman, antiBomberman, monedas, cartelMonedasJug1, cartelBombasJug1, cartelMonedasJug2, cartelBombasJug2)
+                    game.schedule(2000, { game.removeVisual(finDeJuego) })
+                }
             } 
             else if (collider.tag() == "moneda"){
                 antiBomberman.agarrarMoneda(collider, cartelMonedasJug2)
