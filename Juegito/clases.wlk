@@ -59,7 +59,7 @@ class Bombermans{
     method agarrarMoneda(moneda, cartelMonedas) {
         monedasRecogidas += 1
         if (monedasRecogidas > 5) { monedasRecogidas = 5 }
-        if (moneda != null){ game.removeVisual(moneda) }
+        game.removeVisual(moneda)
         cartelMonedas.image(tag + nombreMonedas.get(monedasRecogidas))
     }
     method recibirExplosion(cartelMonedas) {
@@ -277,6 +277,7 @@ object gameManager {
                 }
             } 
             else if (collider.tag() == "moneda"){
+                game.sound("Item_Get.wav").play()
                 bomberman.agarrarMoneda(collider, cartelMonedasJug1)
                 monedas.remove(collider)
 
@@ -306,6 +307,7 @@ object gameManager {
                 }
             } 
             else if (collider.tag() == "moneda"){
+                game.sound("Item_Get.wav").play()
                 antiBomberman.agarrarMoneda(collider, cartelMonedasJug2)
                 monedas.remove(collider)
                 
