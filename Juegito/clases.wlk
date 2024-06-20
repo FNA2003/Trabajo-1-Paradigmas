@@ -78,7 +78,45 @@ class Bombermans{
 
 // ==================================================================================================
 
-// Bombas que pueden poner los jugadores
+// Bot
+object bot {
+  var property image = "fireBomberman_down.png"
+  var property position = game.at(7,5)
+  const property tag = "bot"
+  const movementFactor = 1  
+  const imagenes = [
+        "fireBomberman_up.png", "fireBomberman_down.png",
+        "fireBomberman_left.png", "fireBomberman_right.png",
+        "fireBomberman_left.png", "fireBomberman_right.png",
+        "fireBomberman_left.png", "fireBomberman_right.png"
+    ]
+
+  method randomMove() {
+    const posibleMoves = [
+        position.up(movementFactor), position.down(movementFactor),
+        position.left(movementFactor), position.right(movementFactor),
+        position.up(movementFactor).left(movementFactor), position.up(movementFactor).right(movementFactor),
+        position.down(movementFactor).left(movementFactor), position.down(movementFactor).right(movementFactor)
+    ]
+    const indice = (0.randomUpTo(posibleMoves.size())).truncate(0)
+    const newPosition = posibleMoves.get(indice)
+    
+    if ((newPosition.x() > 0 && newPosition.x() < 14)  && (newPosition.y() > 0 && newPosition.y() < 10)) {
+        image = imagenes.get(indice)
+        position = newPosition
+    }
+    
+  }
+  method restartGame() {
+    image = "fireBomberman_down.png"
+    position = game.center()
+  }
+}
+
+
+// ==================================================================================================
+
+// Bombas que pueden poner los jugadores y la "CPU"
 class Bomb {
     var property position
     var property image = "bomb.png"
@@ -161,7 +199,7 @@ object gameManager {
     // Lista de monedas que se renderizaron en la pantalla
     const monedas = []
 
-    method iniciarPartida() {        
+    method iniciarPartida() {
         // Seteo del tablero a un multiplo de 16px (tamaño de assets)
         game.width(15)
         game.height(12)
@@ -227,7 +265,6 @@ object gameManager {
         // Colisiones de bomberman ante explosiones y monedas
         game.whenCollideDo(bomberman, {collider =>
             if (collider.tag() == "explosion"){
-                antiBomberman.agarrarMoneda(null, cartelMonedasJug2)
                 bomberman.recibirExplosion(cartelMonedasJug1)
                 bomberman.position(game.origin())
                 game.sound("Bomberman_Dies.wav").play()
@@ -257,7 +294,6 @@ object gameManager {
         // Colisiones de antiBomberman ante explosiones y monedas
         game.whenCollideDo(antiBomberman, {collider =>
             if (collider.tag() == "explosion"){
-                bomberman.agarrarMoneda(null, cartelMonedasJug1)
                 antiBomberman.recibirExplosion(cartelMonedasJug2)
                 antiBomberman.position(game.at(14,10))
                 game.sound("Bomberman_Dies.wav").play()
@@ -287,6 +323,21 @@ object gameManager {
         })
 
         // =====================================================================
+
+        // Si alguien colisiona con el bot, este pone una bomba
+        game.onCollideDo(bot, {collider =>
+            if(collider.tag() == "bomberman" || collider.tag() == "antiBomberman"){
+                game.sound("Kick.wav").play()
+                game.schedule(100, {
+                    game.sound("Place_Bomb.wav").play()
+                    const b = new Bomb(position=bot.position())
+                    game.addVisual(b)
+                    game.schedule(bombTime, { b.explode(b) })
+                })                
+            }
+        })
+
+        // =====================================================================
         
         //Agrego moneda al mapa y a la lista de monedas, y su efecto de rotar
         game.onTick(7000, "nuevaMoneda", {
@@ -297,13 +348,21 @@ object gameManager {
                 game.onTick(400, "girarMoneda", {moneda.newImage()})
             }
         })
+        // =====================================================================
+        
+        // Cada cierto tiempo el bot se mueve solo
+        game.onTick(900, "botMovement", {
+            bot.randomMove()
+        })
 
         // =====================================================================
 
         // Reinicio de juego
         keyboard.r().onPressDo({ restart.restart(bomberman, antiBomberman, monedas, cartelMonedasJug1, cartelBombasJug1, cartelMonedasJug2, cartelBombasJug2) })
 
+    
         // Agregamos los personajes
+        game.addVisual(bot)
         game.addVisual(bomberman)
         game.addVisual(antiBomberman)
         game.boardGround("fondo.png")
@@ -322,6 +381,7 @@ object restart {
 
         jugador1.finPartida(cartelMonedasJug1, cartelBombasJug1)
         jugador2.finPartida(cartelMonedasJug2, cartelBombasJug2)
+        bot.restartGame()
     }
 }
 
