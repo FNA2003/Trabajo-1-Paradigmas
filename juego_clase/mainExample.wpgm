@@ -1,7 +1,0 @@
-import wollok.game.*
-
-import example.*
-
-program PepitaGame {
-	juego.iniciar()
-}
