@@ -1,0 +1,6 @@
+import Manager.gameManager
+
+program juego {
+    gameManager.initialize()
+    gameManager.runGame()
+}
