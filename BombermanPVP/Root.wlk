@@ -1,17 +1,21 @@
 import wollok.game.*
 
+object root {
+    // Ancho
+    method gameWidth() = 15
+    
+    // Alto
+    method gameHeight() = 12
+    
+    // Tamaño de celda
+    method cellSize() = 16
 
-/* Constantes que se utilizaran en los distintos archivos para evitar errores de la libreria game */
-const gameWidth = 15
-const gameHeight = 12
-const cellSize = 16
+    // Tiempo de aparicion de una moneda
+    method coinsAppearTime() = 5000
 
-const playersMovementFactor = 1
-
-const bombTime = 1700
-const coinsAppearTime = 5000
-const botMovementTime = 900
-
+    // Tiempo cada cuanto se mueve el bot
+    method botMovementTime() = 900
+}
 
 /* Clase "basica" de un visual para wollok game */
 class DefaultVisual {

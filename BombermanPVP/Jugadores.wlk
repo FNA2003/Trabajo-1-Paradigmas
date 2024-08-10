@@ -1,51 +1,39 @@
 import Bombermans.Bombermans
 import Bombas.Bombs
-
-
-
-
-/* Forma basica en la que se encuentra el archivo de imagen del score de las bombas (Igual para todos los jugadores) */
-const bombsRoute = [
-    "_bombs_0.png",
-    "_bombs_1.png",
-    "_bombs_2.png",
-    "_bombs_3.png",
-    "_bombs_4.png"
-]
-/* Forma basica de la ruta para el puntaje de las monedas (Unica por jugador) */
-const coinsRoute = [
-    "_coins_0.png",
-    "_coins_1.png",
-    "_coins_2.png",
-    "_coins_3.png",
-    "_coins_4.png",
-    "_coins_5.png"
-]
+import Sonidos.*
 
 
 class Players inherits Bombermans {
-    var property coinsPicked = 0 // Monedas actuales
-    var property avaibleBombs = 1 // Bombas disponibles (Aumentan al agarrar monedas)
+    const originalPos //Posicion Original de cada bomberman
+
+    // Tableros
+    const coinsScore
+    const bombsScore
+
+    var coinsPicked = 0 // Monedas actuales
+    method coinsPicked() = coinsPicked // Para consultar monedas actuales
+
+    var availableBombs = 1 // Bombas disponibles (Aumentan al agarrar monedas)
 
 
     /* Metodo para poner bombas */
-    method plantBomb(bombScore ,plantSound, explosionSound) {
-        if (avaibleBombs > 0) {
-            const b = new Bombs(position=position, image="bomb.png", tag="bomb")
+    method plantBomb(counterOnTickParameter) {
+        if (availableBombs > 0) {
+            const b = new Bombs(position=position, nameOnTick=counterOnTickParameter)
             game.addVisual(b)
 
-            b.plantBomb(b, plantSound, explosionSound)
-            avaibleBombs -= 1
+            b.plantBomb(b)
+            availableBombs -= 1
 
-            bombScore.image("bombermans" + bombsRoute.get(avaibleBombs))
+            bombsScore.image("bombermans_bombs_" + availableBombs.toString() + '.png')
         }
     }    
 
     /* Metodo que permite agarrar una moneda y variar el objeto de los puntajes */
-    method getCoin(coinVisual, getSound,bombsScore, coinsScore) {
+    method getCoin(coinVisual) {
         // Salvamos la cantidad de monedas del jugador y le damos una bomba
         coinsPicked += 1
-        avaibleBombs += 1
+        availableBombs += 1
 
         getSound.playSound()
 
@@ -53,35 +41,35 @@ class Players inherits Bombermans {
 
         // Verificamos que no pase el maximo impuesto de cada variable
         coinsPicked = coinsPicked.min(5)
-        avaibleBombs = avaibleBombs.min(4)
+        availableBombs = availableBombs.min(4)
 
         // Hacemos visual el cambio
-        coinsScore.image(tag + coinsRoute.get(coinsPicked))
-        bombsScore.image("bombermans" + bombsRoute.get(avaibleBombs))        
+        coinsScore.image(tag + '_coins_' + coinsPicked.toString() + '.png')
+        bombsScore.image("bombermans_bombs_" + availableBombs.toString() + '.png')        
     }
 
     /* Metodo para manejar cuando recibimos una explosion y perder monedas */
-    method getExplosion(coinsScore, originalPos, hurtSound) {
+    method getExplosion() {
         // Modificamos la cantidad de monedas
         coinsPicked -= 1
-        hurtSound.playSound()
+        soundDies.playSound()
         
-        // Verificamos que sea negativo
+        // Verificamos que no sea negativo
         coinsPicked = coinsPicked.max(0)
         position = originalPos
 
         // Acentamos el cambio en el cartel
-        coinsScore.image(tag + coinsRoute.get(coinsPicked))
+        coinsScore.image(tag + '_coins_' + coinsPicked.toString() + '.png')
     }
 
     /* Reiniciamos las variables del jugador cuando se termina la ronda */
-    method restartGame(originPosition, bombsScore, coinsScore) {
+    method restartGame() {
         coinsPicked = 0
-        avaibleBombs = 1
+        availableBombs = 1
 
-        position = originPosition
+        position = originalPos
 
-        bombsScore.image("bombermans" + bombsRoute.get(1))
-        coinsScore.image(tag + coinsRoute.get(0))
+        bombsScore.image("bombermans_bombs_1.png")
+        coinsScore.image(tag + '_coins_0.png')
     }
 }

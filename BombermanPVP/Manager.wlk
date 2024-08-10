@@ -4,71 +4,46 @@ import Bots.Bots
 import Monedas.Coins
 import Sonidos.Sounds
 import Bombas.Bombs
+import Movements.*
 
 
 object gameManager {
-    // Personajes que se mostraran
-    var bomberman = null
-    var antiBomberman = null
-    var bot = null
-
     // Posiciones por defecto de los bombermans
     const originalPosBomberman = game.at(0, 0)
-    const originalPosAntiBomberman = game.at(gameWidth-1, gameHeight - 2)
-    const originalPosBot = game.at( ((gameWidth-1)/2).truncate(0), ((gameHeight-1)/2).truncate(0) )
+    const originalPosAntiBomberman = game.at(root.gameWidth()-1, root.gameHeight() - 2)
+    const originalPosBot = game.at( ((root.gameWidth()-1)/2).truncate(0), ((root.gameHeight()-1)/2).truncate(0) )
 
     // Monedas que se muestran en pantalla
-    const coins = []
+    const property coins = []
 
-    // Carteles de puntaje (Objetos)
-    var scoreCoinsBomberman = null
-    var scoreBombsBomberman = null
-    var scoreCoinsAntibomberman = null
-    var scoreBombsAntibomberman = null
+    // Creamos los objetos puntaje
+    const scoreCoinsBomberman = new DefaultVisual(position=game.at(3,11), image="bomberman_coins_0.png", tag="cartel")
+    const scoreCoinsAntibomberman = new DefaultVisual(position=game.at(11,11), image="antiBomberman_coins_0.png", tag="cartel")
+    const scoreBombsBomberman = new DefaultVisual(position=game.at(1,11), image="bombermans_bombs_1.png", tag="cartel")
+    const scoreBombsAntibomberman = new DefaultVisual(position=game.at(9,11), image="bombermans_bombs_1.png", tag="cartel")
 
-    // Objeto que muestra que termino la ronda
-    var endOfGame = null
+    // Creamos a los personajes
+    const bomberman = new Players(position=originalPosBomberman, image="bomberman_down.png", tag="bomberman", originalPos=originalPosBomberman, coinsScore=scoreCoinsBomberman, bombsScore=scoreBombsBomberman)
+    const antiBomberman = new Players(position=originalPosAntiBomberman, image="antiBomberman_down.png", tag="antiBomberman", originalPos=originalPosAntiBomberman, coinsScore=scoreCoinsAntibomberman, bombsScore=scoreBombsAntibomberman)
+    const bot = new Bots(position=originalPosBot, image="fireBomberman_down.png", tag="fireBomberman", originalPos=originalPosBot)
 
-    // Sonidos correspondientes a cada accion del juego
-    var soundExplotion = null
-    var soundDies = null
-    var soundItemGet = null
-    var soundKick = null
-    var soundPlaceBomb = null
-    var soundWalking = null
-    var soundStageClear = null
+    // Agregamos sonidos del juego (de caminar y de reinicio)
+    const soundWalking = new Sounds(soundPath="Walking.mp3")
+    const soundStageClear = new Sounds(soundPath="Stage_Clear.wav")
 
+    // Y, al objeto que contiene el fin de juego
+    const endOfGame = new DefaultVisual(tag="cartel", image="game_over_retro.png", position=game.at(4, 2))
+
+    // Identificador unico de los OnTick de cada bomba/explosion
+    var property counterOnTick = 0
 
     // Metodo para dar un origen y clase a cada objeto necesario para el juego
     method initialize() {
         // Inicializamos el tablero
-        game.width(gameWidth)
-        game.height(gameHeight)
-        game.cellSize(cellSize)
+        game.width(root.gameWidth())
+        game.height(root.gameHeight())
+        game.cellSize(root.cellSize())
         game.boardGround("background.png")
-
-        // Creamos a los personajes
-        bomberman = new Players(position=originalPosBomberman, image="bomberman_down.png", tag="bomberman")
-        antiBomberman = new Players(position=originalPosAntiBomberman, image="antiBomberman_down.png", tag="antiBomberman")
-        bot = new Bots(position=originalPosBot, image="fireBomberman_down.png", tag="fireBomberman")
-
-        // Agregamos los sonidos del juego
-        soundExplotion = new Sounds(soundPath="Bomb_Explodes.mp3")
-        soundDies = new Sounds(soundPath="Bomberman_Dies.mp3")
-        soundItemGet = new Sounds(soundPath="Item_Get.mp3")
-        soundKick = new Sounds(soundPath="Kick.mp3")
-        soundPlaceBomb = new Sounds(soundPath="Place_Bomb.mp3")
-        soundWalking = new Sounds(soundPath="Walking.mp3")
-        soundStageClear = new Sounds(soundPath="Stage_Clear.wav")
-
-        // Creamos los objetos puntaje
-        scoreCoinsBomberman = new DefaultVisual(position=game.at(3,11), image="bomberman_coins_0.png", tag="cartel")
-        scoreCoinsAntibomberman = new DefaultVisual(position=game.at(11,11), image="antiBomberman_coins_0.png", tag="cartel")
-        scoreBombsBomberman = new DefaultVisual(position=game.at(1,11), image="bombermans_bombs_1.png", tag="cartel")
-        scoreBombsAntibomberman = new DefaultVisual(position=game.at(9,11), image="bombermans_bombs_1.png", tag="cartel")
-
-        // Y, al objeto que contiene el fin de juego
-        endOfGame = new DefaultVisual(tag="cartel", image="game_over_retro.png", position=game.at(4, 2))
     }
 
     // Bucle/Entorno principal de ejecucion del juego
@@ -77,63 +52,43 @@ object gameManager {
         game.addVisual(bomberman)
         game.addVisual(antiBomberman)
         game.addVisual(bot)
+
         // Y del puntaje
         game.addVisual(scoreCoinsBomberman)
         game.addVisual(scoreCoinsAntibomberman)
         game.addVisual(scoreBombsBomberman)
         game.addVisual(scoreBombsAntibomberman)
 
-
         // Movimiento del jugador 1, bomberman
-        keyboard.a().onPressDo({ bomberman.move("left", soundWalking) })
-        keyboard.d().onPressDo({ bomberman.move("right", soundWalking) })
-        keyboard.w().onPressDo({ bomberman.move("up", soundWalking) })
-        keyboard.s().onPressDo({ bomberman.move("down", soundWalking) })
+        keyboard.a().onPressDo({ bomberman.move(left, soundWalking) })
+        keyboard.d().onPressDo({ bomberman.move(right, soundWalking) })
+        keyboard.w().onPressDo({ bomberman.move(up, soundWalking) })
+        keyboard.s().onPressDo({ bomberman.move(down, soundWalking) })
+
         // Movimiento de antiBomberman, jugador 2
-        keyboard.left().onPressDo({ antiBomberman.move("left", soundWalking) })
-        keyboard.right().onPressDo({ antiBomberman.move("right", soundWalking) })
-        keyboard.up().onPressDo({ antiBomberman.move("up", soundWalking) })
-        keyboard.down().onPressDo({ antiBomberman.move("down", soundWalking) })
+        keyboard.left().onPressDo({ antiBomberman.move(left, soundWalking) })
+        keyboard.right().onPressDo({ antiBomberman.move(right, soundWalking) })
+        keyboard.up().onPressDo({ antiBomberman.move(up, soundWalking) })
+        keyboard.down().onPressDo({ antiBomberman.move(down, soundWalking) })
 
         // Bombas de bomberman
-        keyboard.space().onPressDo({ bomberman.plantBomb(scoreBombsBomberman, soundPlaceBomb, soundExplotion) })
+        keyboard.space().onPressDo({ bomberman.plantBomb(counterOnTick) counterOnTick+=1})
         // Bombas de antiBomberman
-        keyboard.enter().onPressDo({ antiBomberman.plantBomb(scoreBombsAntibomberman, soundPlaceBomb, soundExplotion) })
+        keyboard.enter().onPressDo({ antiBomberman.plantBomb(counterOnTick) counterOnTick+=1})
 
 
         // Colisiones de bomberman ante explosiones y monedas
         game.onCollideDo(bomberman, { collider =>
-            if(collider.tag() == "explosion"){
-                bomberman.getExplosion(scoreCoinsBomberman, originalPosBomberman, soundDies)
-                game.removeVisual(collider)
-            } else if (collider.tag() == "moneda"){
-                bomberman.getCoin(collider, soundItemGet, scoreBombsBomberman, scoreCoinsBomberman)
-                if (bomberman.coinsPicked() >= 5){ self.restartGame() }
-                coins.remove(collider)
-            }
-        })
-        // Colisiones de antiBomberman ante explosiones y monedas
-        game.onCollideDo(antiBomberman, { collider =>
-            if(collider.tag() == "explosion"){
-                antiBomberman.getExplosion(scoreCoinsAntibomberman, originalPosAntiBomberman, soundDies)
-                game.removeVisual(collider)
-            } else if (collider.tag() == "moneda"){
-                antiBomberman.getCoin(collider, soundItemGet, scoreBombsAntibomberman, scoreCoinsAntibomberman)
-                if (antiBomberman.coinsPicked() >= 5){ self.restartGame() }
-                coins.remove(collider)                
-            }
+            collider.collide(bomberman, collider)
         })
 
-        // Cuando el bot colisiona con nosotros pone una bomba
-        game.onCollideDo(bot, { collider =>
-            if (collider.tag() == "bomberman" || collider.tag() == "antiBomberman") {
-                soundKick.playSound()
-                game.schedule(250, { bot.plantBomb(soundPlaceBomb, soundExplotion) })
-            }
+        // Colisiones de antiBomberman ante explosiones y monedas
+        game.onCollideDo(antiBomberman, { collider =>
+            collider.collide(antiBomberman, collider)
         })
 
         // Agregamos una moneda cada 7seg
-        game.onTick(coinsAppearTime, "nuevaMoneda", {
+        game.onTick(root.coinsAppearTime(), "nuevaMoneda", {
             if (coins.size() < 2) {
                 const coin = new Coins()
                 coins.add(coin)
@@ -143,7 +98,7 @@ object gameManager {
         })
 
         // Cada cierto tiempo se mueve el bot
-        game.onTick(botMovementTime, "botMovement", { bot.randomMove() })
+        game.onTick(root.botMovementTime(), "botMovement", { bot.randomMove() })
 
         // Reinicio manual del juego
         keyboard.r().onPressDo({ self.restartGame() })
@@ -160,9 +115,9 @@ object gameManager {
         coins.forEach({ coin => game.removeVisual(coin) coins.remove(coin) })
         game.removeTickEvent("girarMoneda")
 
-        bomberman.restartGame(originalPosBomberman, scoreBombsBomberman, scoreCoinsBomberman)
-        antiBomberman.restartGame(originalPosAntiBomberman, scoreBombsAntibomberman, scoreCoinsAntibomberman)
-        bot.restartGame(originalPosBot)
+        bomberman.restartGame()
+        antiBomberman.restartGame()
+        bot.restartGame()
 
         game.schedule(2000, { game.removeVisual(endOfGame) })
     }
